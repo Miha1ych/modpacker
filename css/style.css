@@ -1,0 +1,966 @@
+/* ----------------------------------------------------------------------
+   Miha1ych Packer — тема "жидкое стекло" (wine)
+   Палитра и приём стеклянных поверхностей — по образцу присланного
+   liquid-glass-wine.css: тёплый off-white текст (не чистый белый, чтобы
+   не сливаться с фоном), в меру непрозрачная стеклянная заливка
+   (градиент-блик + плотная тёмная подложка), а не почти прозрачная.
+   ---------------------------------------------------------------------- */
+
+:root {
+  --text: #F8EDEF;
+  --text-dim: #CBA8AF;
+  --text-faint: #93737B;
+
+  /* стеклянная поверхность: блик сверху + плотная тёмная подложка снизу —
+     именно подложка держит контраст текста, а не только блик */
+  --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.018)), rgba(20,10,14,0.68);
+  --glass-bg-strong: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)), rgba(20,10,14,0.78);
+  --glass-bg-soft: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012)), rgba(20,10,14,0.5);
+  --glass-border: #59313D;
+  --glass-border-strong: #B85C72;
+  --glass-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 50px rgba(0,0,0,0.42);
+
+  --select-panel: #211017;
+
+  --rose: #E39AA9;
+  --wine: #B85C72;
+  --wine-deep: #7A3C4C;
+  --danger: #E0684F;
+
+  --radius-lg: 26px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: #05070A; /* подложка на случай, если .bg-scene ещё не отрисовался */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent; /* видимый фон рисует .bg-scene под контентом */
+  color: var(--text);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+a { color: var(--rose); }
+
+:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
+/* ---------- Фон: тёплый винный градиент + мягкая подсветка ---------- */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(184,92,114,0.26), transparent 34%),
+    radial-gradient(circle at 82% 16%, rgba(255,255,255,0.035), transparent 30%),
+    radial-gradient(circle at 30% 85%, rgba(122,60,76,0.22), transparent 40%),
+    linear-gradient(145deg, #241016, #160A0E 52%, #05070A);
+}
+
+/* ---------- Редкие огоньки на фоне ---------- */
+/* Раньше здесь летали сердечки — заменили на еле заметные огоньки: их
+   меньше, они мельче, летят намного медленнее и реже, тусклее светятся —
+   не отвлекают от контента, просто едва заметное движение в фоне. */
+.fireflies {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.firefly-wrap {
+  position: absolute;
+  bottom: -5%;
+  opacity: 0; /* без анимации (reduced motion) огоньки просто не видны */
+}
+.firefly {
+  display: block;
+  width: var(--firefly-size, 3px);
+  height: var(--firefly-size, 3px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,224,196,0.95), rgba(227,154,169,0.35) 60%, transparent 72%);
+  box-shadow: 0 0 5px 1.5px rgba(255,214,180,0.4), 0 0 10px 3px rgba(227,154,169,0.2);
+}
+
+/* у каждого огонька — свой размер/позиция/скорость/задержка, чтобы они не
+   летели строем и появлялись по одному, а не все разом */
+.f1 { left: 10%; --firefly-size: 3px; }
+.f2 { left: 28%; --firefly-size: 2.5px; }
+.f3 { left: 50%; --firefly-size: 3.5px; }
+.f4 { left: 70%; --firefly-size: 2.5px; }
+.f5 { left: 88%; --firefly-size: 3px; }
+
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ---------- Общий стеклянный стиль ---------- */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: var(--glass-shadow);
+}
+
+/* ---------- Header ----------
+   Шапка — плавающая стеклянная карточка (как везде на сайте), а не плоский
+   бар во всю ширину: с отступом от края экрана, скруглением и тенью, чтобы
+   держать общий язык "жидкого стекла", а не выбиваться из него. */
+.site-header {
+  padding: 14px 0 0;
+  position: sticky;
+  top: 14px;
+  z-index: 50;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg-strong);
+  border: 1.5px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: var(--glass-shadow);
+}
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-mark {
+  width: 30px; height: 30px;
+  display: block;
+  /* пиксель-арт лого — рендерим чётко, без сглаживания при масштабировании */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  filter: drop-shadow(0 2px 8px rgba(184,92,114,0.45));
+  transform-origin: 50% 85%;
+}
+.brand:hover .brand-mark { animation: brand-wag .5s ease; }
+.brand-text { font-family: 'Unbounded', 'Manrope', sans-serif; font-size: 1rem; }
+.brand-name { font-weight: 700; color: var(--text); transition: color .15s ease, text-shadow .15s ease; }
+.brand-suffix { font-weight: 500; color: var(--rose); margin-left: 3px; transition: color .15s ease, text-shadow .15s ease; }
+
+/* Декодинг-эффект логотипа при переходе между вкладками: пока идёт
+   "расшифровка" случайных символов, буквы подсвечиваются и слегка светятся. */
+.brand-name.decoding,
+.brand-suffix.decoding {
+  color: #FF9478;
+  text-shadow: 0 0 8px rgba(184,92,114,0.75), 0 0 2px rgba(255,255,255,0.5);
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-name.decoding,
+  .brand-suffix.decoding {
+    color: inherit;
+    text-shadow: none;
+  }
+}
+
+/* ---------- Верхняя навигация по разделам сайта ----------
+   Один цельный "сегмент-контрол" вместо отдельных плашек — меньше визуального
+   шума, чем у россыпи бордеров, активный пункт просто заливается градиентом. */
+.top-nav {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  /* чуть утоплено относительно карточки хедера — читается как выемка,
+     а не ещё один слой стекла поверх стекла */
+  background: rgba(0,0,0,0.24);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.top-nav::-webkit-scrollbar { display: none; }
+.top-nav-link {
+  flex-shrink: 0;
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 9px 18px;
+  border-radius: 999px;
+  transition: all .18s ease;
+  white-space: nowrap;
+}
+.top-nav-link:hover { color: var(--text); }
+.top-nav-link.is-active {
+  color: #12080C;
+  background: linear-gradient(135deg, var(--wine), var(--rose));
+  box-shadow: 0 4px 14px rgba(184,92,114,0.3);
+}
+
+/* ---------- Hero ---------- */
+.hero { padding: 48px 0 34px; text-align: center; }
+.eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--rose);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(1.8rem, 4.4vw, 2.9rem);
+  line-height: 1.18;
+  margin: 0 0 16px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  text-wrap: balance;
+}
+.hero .accent {
+  background: linear-gradient(120deg, var(--wine), var(--rose));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-sub {
+  color: var(--text-dim);
+  max-width: 560px;
+  margin: 0 auto;
+  font-size: 1.02rem;
+}
+
+/* Плавный заход контента при загрузке страницы, по очереди сверху вниз */
+.eyebrow, .hero h1, .hero-sub, .wizard-shell { opacity: 1; }
+
+/* ---------- Wizard shell ---------- */
+.wizard-shell {
+  border-radius: var(--radius-lg);
+  padding: 28px 28px 30px;
+  margin-top: 8px;
+  overflow: hidden;
+  background: var(--glass-bg-strong);
+}
+
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+.wp-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: rgba(248,237,239,0.16);
+  transition: all .25s ease;
+  flex-shrink: 0;
+}
+.wp-dot.done { background: var(--rose); }
+.wp-dot.active {
+  background: var(--wine);
+  width: 22px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px rgba(184,92,114,0.22);
+  animation: dot-pulse 2.2s ease-in-out infinite;
+}
+.wp-line {
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+}
+.wp-label {
+  margin-left: 10px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.wizard-track { position: relative; min-height: 1px; }
+
+.wizard-step {
+  transition: transform .32s cubic-bezier(.22,.61,.36,1), opacity .32s ease;
+  transform: translateX(0);
+  opacity: 1;
+}
+.wizard-step[hidden] { display: none; }
+.wizard-step.leave-fwd { transform: translateX(-26px); opacity: 0; }
+.wizard-step.leave-back { transform: translateX(26px); opacity: 0; }
+.wizard-step.enter-fwd-start { transform: translateX(26px); opacity: 0; }
+.wizard-step.enter-back-start { transform: translateX(-26px); opacity: 0; }
+
+.step-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.step-sub { color: var(--text-dim); font-size: 0.88rem; margin: 0 0 16px; }
+
+/* ---------- Option grids (категория / загрузчик / ядро) ---------- */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+.option-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.option-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+.option-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .18s ease;
+}
+.option-card:hover:not(:disabled) { border-color: var(--glass-border-strong); transform: translateY(-2px); box-shadow: 0 0 18px rgba(184,92,114,0.18); }
+.option-card:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+.option-card.selected {
+  border-color: var(--wine);
+  background: linear-gradient(160deg, rgba(184,92,114,0.28), rgba(20,10,14,0.6));
+  box-shadow: 0 0 0 1px var(--wine) inset, 0 6px 20px rgba(184,92,114,0.22);
+  animation: card-pop .35s cubic-bezier(.34,1.56,.64,1);
+}
+.option-card:disabled,
+.option-card.disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.option-card.checking { opacity: 0.65; cursor: wait; }
+.option-card .option-icon { font-size: 1.5rem; }
+.option-card img.option-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+  transition: transform .18s ease;
+}
+.option-card img.option-icon.pixel-icon { image-rendering: pixelated; object-fit: contain; background: rgba(0,0,0,0.18); padding: 4px; }
+.option-card:hover:not(:disabled) img.option-icon { transform: scale(1.06); }
+.option-card .option-title { font-weight: 700; font-size: 0.98rem; color: var(--text); }
+.option-card .option-tagline { color: var(--text-dim); font-size: 0.82rem; line-height: 1.4; }
+.option-card.disabled .option-tagline { color: var(--danger); }
+
+/* Карточки загрузчика: лого в углу слева, название рядом с ним в один
+   ряд, а описание — отдельной строкой под этим рядом (не по центру, как
+   у карточек категорий/ядра — тут текста больше, ему нужен ряд-заголовок). */
+#loaderGrid .option-card { align-items: stretch; text-align: left; gap: 10px; }
+#loaderGrid .option-head { display: flex; align-items: center; gap: 12px; }
+#loaderGrid .option-title { font-size: 1.02rem; }
+#loaderGrid .option-tagline { font-size: 0.83rem; }
+
+.hint { color: var(--text-faint); font-size: 0.82rem; margin: 14px 0 0; }
+
+/* ---------- Version select ---------- */
+.glass-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--glass-bg-soft);
+  color: var(--text);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-family: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23CBA8AF' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+.glass-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.glass-input:not(:disabled):hover { border-color: var(--glass-border-strong); }
+
+/* Нативный попап <select> рисуется браузером/ОС поверх страницы и не
+   наследует backdrop-filter — задаём непрозрачный тёмный фон явно,
+   иначе текст в раскрытом списке сливается с белым фоном по умолчанию. */
+.glass-input option {
+  background: var(--select-panel);
+  color: var(--text);
+}
+
+/* ---------- Кастомный выпадающий список (замена <select> там, где выбирают версию) ----------
+   Нативный <select> сам решает, открыться ли ему вверх или вниз, если снизу
+   мало места — это никак не стилизуется и не управляется явно. Поэтому
+   список рисуем сами: панель всегда раскрывается вниз, аккуратно, в стиле
+   "жидкого стекла" (см. enhanceSelectAsDropdown() в js/common.js). */
+.custom-select { position: relative; }
+.native-select-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.custom-select-trigger {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+.custom-select-trigger:disabled { cursor: not-allowed; }
+.custom-select-value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.custom-select.is-open .custom-select-trigger {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(184,92,114,0.18);
+}
+.custom-select-panel {
+  /* position: fixed + left/top/width считаются в JS (positionPanel() в
+     js/common.js) и прибиваются inline-стилями — так список не обрезается
+     первым же предком с overflow: hidden (например .wizard-shell). */
+  position: fixed;
+  z-index: 200;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  background: var(--select-panel);
+  border: 1.5px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  animation: select-panel-in .16s ease;
+}
+@keyframes select-panel-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.custom-select-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.custom-select-option:hover:not(:disabled),
+.custom-select-option:focus-visible:not(:disabled) {
+  background: rgba(255,255,255,0.07);
+  outline: none;
+}
+.custom-select-option.is-selected:not(.is-placeholder) {
+  background: linear-gradient(135deg, var(--wine), var(--rose));
+  color: #12080C;
+  font-weight: 700;
+}
+.custom-select-option.is-placeholder { color: var(--text-faint); }
+.custom-select-option:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Аккуратный скроллбар для длинного списка версий */
+.custom-select-panel::-webkit-scrollbar { width: 8px; }
+.custom-select-panel::-webkit-scrollbar-track { background: transparent; }
+.custom-select-panel::-webkit-scrollbar-thumb {
+  background: var(--glass-border-strong);
+  border-radius: 999px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 13px 26px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: scale(0.96); }
+.btn-primary,
+.btn-accent {
+  background: linear-gradient(135deg, var(--wine), var(--rose));
+  color: #12080C;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 8px 24px rgba(184,92,114,0.28), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.btn-primary:not(:disabled):hover,
+.btn-accent:not(:disabled):hover {
+  box-shadow: 0 10px 30px rgba(184,92,114,0.32), inset 0 1px 0 rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+.btn-primary:not(:disabled):active,
+.btn-accent:not(:disabled):active {
+  transform: scale(0.96);
+}
+.btn-ghost {
+  background: var(--glass-bg-soft);
+  color: var(--text-dim);
+  border: 1.5px solid var(--glass-border);
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--glass-border-strong); }
+
+.step-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.status-text { color: var(--text-dim); font-size: 0.85rem; margin-top: 12px; }
+.status-text.error { color: var(--danger); }
+.status-text:empty { margin: 0; }
+
+/* ---------- Results ---------- */
+.results-head h2 { margin: 0 0 4px; color: var(--text); }
+.mods-group { margin-top: 22px; }
+.mods-group-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-faint);
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+.mods-group-title.muted { color: var(--text-faint); }
+
+.mods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+.mods-grid.muted .mod-card { opacity: 0.55; }
+
+.mod-card {
+  display: flex;
+  gap: 12px;
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.mod-card:hover { border-color: var(--glass-border-strong); }
+.mod-card.checked {
+  border-color: var(--wine);
+  background: linear-gradient(160deg, rgba(184,92,114,0.22), rgba(20,10,14,0.55));
+}
+.mod-card.check-pop { animation: card-pop .35s cubic-bezier(.34,1.56,.64,1); }
+.mod-card.unavailable { cursor: default; }
+
+/* Карточки результата подбора влетают по очереди, а не все разом —
+   задержку каждой карточке проставляет js/app.js через style.animationDelay */
+.mod-card.stagger-in {
+  animation: fadeInUp .38s ease both;
+}
+
+.mod-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--glass-border);
+}
+.mod-icon.placeholder {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.mod-info { flex: 1; min-width: 0; }
+.mod-title { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+.mod-note { color: var(--text-dim); font-size: 0.76rem; margin-top: 3px; line-height: 1.35; }
+
+/* Свой чекбокс вместо нативного (у него дефолтный вид ОС даже с accent-color,
+   и он выбивался из "жидкого стекла") — рисуем квадрат-плашку с рамкой и
+   галочкой на ::after, когда отмечен. */
+.mod-check {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  margin: 1px 0 0;
+  border-radius: 7px;
+  border: 1.5px solid var(--glass-border-strong);
+  background: var(--glass-bg-soft);
+  cursor: pointer;
+  position: relative;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+.mod-card:hover .mod-check { border-color: var(--rose); }
+.mod-check:checked {
+  background: linear-gradient(135deg, var(--wine), var(--rose));
+  border-color: var(--rose);
+}
+.mod-check:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 11px;
+  border: solid #12080C;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(40deg);
+}
+.mod-check:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(184,92,114,0.35);
+}
+
+/* ---------- Download bar ---------- */
+.download-bar { margin-top: 26px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.progress-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+.progress-track { flex: 1; height: 7px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--wine), var(--rose), var(--wine));
+  background-size: 200% 100%;
+  transition: width .2s ease;
+}
+
+/* ---------- How-to ---------- */
+.howto { margin-top: 28px; border-radius: var(--radius-md); padding: 16px 20px; background: var(--glass-bg-soft); }
+.howto summary { cursor: pointer; font-weight: 700; font-size: 0.9rem; color: var(--text); }
+.howto ol { margin: 12px 0 0; padding-left: 20px; color: var(--text-dim); font-size: 0.88rem; }
+.howto li { margin-bottom: 6px; }
+.howto code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--text); }
+
+/* ---------- Общие элементы для новых разделов (проверка/зеркало/репак) ---------- */
+.tool-shell {
+  border-radius: var(--radius-lg);
+  padding: 28px 28px 30px;
+  margin-top: 8px;
+  background: var(--glass-bg-strong);
+}
+.tool-shell + .tool-shell { margin-top: 18px; }
+
+.callout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin: 0 0 20px;
+  font-size: 0.86rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.callout-icon { font-size: 1.2rem; flex-shrink: 0; }
+.callout b { color: var(--text); }
+.callout.warn { border-color: var(--danger); }
+
+/* Строка поиска: инпут + селекты + кнопка */
+.search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.search-row .glass-input { width: auto; flex: 1 1 240px; }
+.search-row select.glass-input { flex: 0 1 180px; }
+
+/* Сетка карточек результата поиска */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: all .18s ease;
+}
+.result-card:hover { border-color: var(--glass-border-strong); transform: translateY(-2px); }
+.result-card.selected {
+  border-color: var(--wine);
+  background: linear-gradient(160deg, rgba(184,92,114,0.22), rgba(20,10,14,0.55));
+}
+.result-head { display: flex; gap: 10px; align-items: center; }
+.result-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--glass-border);
+}
+.result-icon.placeholder {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  background: rgba(255,255,255,0.04);
+}
+.result-title-wrap { min-width: 0; }
+.result-title { font-weight: 700; font-size: 0.94rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-author { font-size: 0.76rem; color: var(--text-faint); }
+.result-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.45; flex: 1; }
+.result-meta { display: flex; gap: 12px; font-size: 0.74rem; color: var(--text-faint); }
+.result-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.result-actions .btn { padding: 8px 14px; font-size: 0.78rem; }
+
+/* Значки статуса/доверия */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.badge-ok { background: rgba(120,200,150,0.16); color: #8FE0AA; }
+.badge-warn { background: rgba(224,104,79,0.16); color: var(--danger); }
+.badge-neutral { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+
+/* Отчёт о доверии (проверка на вирусы) */
+.trust-panel { margin-top: 22px; }
+.trust-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.trust-head .result-icon { width: 54px; height: 54px; }
+.trust-title { font-family: 'Unbounded', sans-serif; font-size: 1.05rem; color: var(--text); margin: 0 0 4px; }
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.trust-item {
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.trust-item-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-faint); margin-bottom: 5px; }
+.trust-item-value { font-size: 0.88rem; color: var(--text); font-weight: 600; }
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.file-name { font-weight: 700; font-size: 0.86rem; color: var(--text); flex: 1 1 200px; word-break: break-all; }
+.file-hash { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 0.72rem; color: var(--text-faint); word-break: break-all; }
+.file-actions { display: flex; gap: 6px; }
+
+/* Зона перетаскивания файла (репак текстурпаков) */
+.dropzone {
+  display: block;
+  border: 1.5px dashed var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  padding: 32px 20px;
+  text-align: center;
+  background: var(--glass-bg-soft);
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: var(--rose);
+  background: linear-gradient(160deg, rgba(184,92,114,0.16), rgba(20,10,14,0.4));
+}
+.dropzone-icon { font-size: 2rem; margin-bottom: 8px; }
+.dropzone-title { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+.dropzone-sub { color: var(--text-faint); font-size: 0.8rem; margin-top: 4px; }
+.dropzone input[type="file"] { display: none; }
+
+#jarReportSection:not(:empty) { margin-top: 22px; }
+/* В отчёте о разборе jar-файла текст крупнее, чем в остальном интерфейсе —
+   это главный момент, где сайт "рассказывает" о находках, он не должен
+   теряться на фоне мелкого служебного текста. */
+#jarReportSection .mods-group-title { font-size: 0.88rem; letter-spacing: 0.3px; }
+#jarReportSection .trust-item-value { font-size: 0.98rem; }
+#jarReportSection .file-name { font-size: 0.95rem; }
+
+/* Итоговый значок риска (крупный, вверху отчёта по jar) */
+.risk-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+  border: 2px solid var(--glass-border);
+}
+.risk-banner.risk-critical { border-color: var(--danger); background: rgba(224,104,79,0.2); }
+.risk-banner.risk-medium { border-color: #E0A34F; background: rgba(224,163,79,0.16); }
+.risk-banner.risk-low { border-color: var(--glass-border-strong); background: var(--glass-bg-soft); }
+.risk-banner.risk-clean { border-color: #78C896; background: rgba(120,200,150,0.14); }
+.risk-banner-icon { font-size: 2.4rem; flex-shrink: 0; }
+.risk-banner-title { font-weight: 800; font-size: 1.3rem; color: var(--text); line-height: 1.25; }
+.risk-banner-sub { font-size: 0.95rem; color: var(--text-dim); margin-top: 4px; line-height: 1.45; }
+
+.finding-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--glass-bg-soft);
+  border: 1.5px solid var(--glass-border);
+  border-left-width: 5px;
+  border-radius: var(--radius-sm);
+  padding: 13px 16px;
+  margin-bottom: 9px;
+}
+.finding-row.sev-critical { border-color: var(--glass-border); border-left-color: var(--danger); background: rgba(224,104,79,0.13); }
+.finding-row.sev-high { border-color: var(--glass-border); border-left-color: #E0A34F; background: rgba(224,163,79,0.1); }
+.finding-row.sev-medium { border-left-color: var(--rose); }
+.finding-row.sev-low { border-left-color: var(--text-faint); }
+.finding-sev {
+  flex-shrink: 0;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-top: 7px;
+}
+.finding-sev.sev-critical { background: var(--danger); box-shadow: 0 0 10px rgba(224,104,79,0.8); }
+.finding-sev.sev-high { background: #E0A34F; box-shadow: 0 0 8px rgba(224,163,79,0.6); }
+.finding-sev.sev-medium { background: var(--rose); }
+.finding-sev.sev-low { background: var(--text-faint); }
+.finding-body { flex: 1; min-width: 0; }
+.finding-label { font-weight: 700; font-size: 1rem; color: var(--text); }
+.finding-row.sev-critical .finding-label { color: #FF9478; }
+.finding-row.sev-high .finding-label { color: #F0B966; }
+.finding-detail { font-size: 0.82rem; color: var(--text-dim); margin-top: 4px; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; word-break: break-all; }
+.finding-count { font-size: 0.78rem; color: var(--text-faint); margin-left: 6px; }
+
+.pack-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+/* ---------- Footer ---------- */
+.site-footer { padding: 22px 0 46px; color: var(--text-faint); font-size: 0.8rem; }
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--glass-border-strong); background-clip: padding-box; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .wizard-shell, .tool-shell { padding: 22px 18px 24px; border-radius: 20px; }
+  .option-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+  #loaderGrid.option-grid.cols-2 { grid-template-columns: 1fr; }
+  .mods-grid, .result-grid { grid-template-columns: 1fr; }
+  .hero { padding: 30px 0 22px; }
+  .wp-label { display: none; }
+  .search-row .glass-input, .search-row select.glass-input { flex: 1 1 100%; }
+  .top-nav {
+    flex-basis: 100%; width: 100%; justify-content: flex-start;
+    /* на телефоне 3 вкладки в винной раскладке не всегда влезают целиком —
+       мягкое затухание справа подсказывает, что ряд можно проскроллить,
+       вместо того чтобы обрезать текст последней вкладки посередине буквы */
+    -webkit-mask-image: linear-gradient(90deg, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, #000 90%, transparent);
+  }
+  .top-nav-link { padding: 8px 13px; font-size: 0.78rem; }
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes card-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(184,92,114,0.22); }
+  50%      { box-shadow: 0 0 0 7px rgba(184,92,114,0.08); }
+}
+@keyframes progress-shimmer {
+  0%   { background-position: 0% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes brand-wag {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-10deg); }
+  75%      { transform: rotate(10deg); }
+}
+@keyframes firefly-float {
+  0% {
+    transform: translate(0, 0) scale(0.7);
+    opacity: 0;
+  }
+  15% { opacity: 0.4; }
+  45% { opacity: 0.15; }
+  60% {
+    transform: translate(var(--sway, 18px), -55vh) scale(1);
+    opacity: 0.35;
+  }
+  88% { opacity: 0.12; }
+  100% {
+    transform: translate(calc(var(--sway, 18px) * -1), -112vh) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Все декоративные, бесконечно повторяющиеся и "заходные" анимации живут
+   только здесь — если у пользователя включено "уменьшить движение" в ОС,
+   сайт остаётся статичным вместо мигания/полёта. */
+@media (prefers-reduced-motion: no-preference) {
+  .eyebrow  { animation: fadeInUp .6s ease both; }
+  .hero h1  { animation: fadeInUp .6s ease .08s both; }
+  .hero-sub { animation: fadeInUp .6s ease .16s both; }
+  .wizard-shell { animation: fadeInUp .6s ease .24s both; }
+
+  .progress-fill { animation: progress-shimmer 1.2s linear infinite; }
+
+  /* Долгие дистанции + большой разброс отрицательных задержек: огоньки
+     почти никогда не летят одновременно, каждый — редкое, одиночное
+     появление, а не постоянный рой (в отличие от прежних сердечек). */
+  .firefly-wrap {
+    animation-name: firefly-float;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .f1 { bottom: -5%;  animation-duration: 42s; animation-delay: -3s;  --sway: 16px; }
+  .f2 { bottom: -12%; animation-duration: 54s; animation-delay: -22s; --sway: -12px; }
+  .f3 { bottom: -3%;  animation-duration: 46s; animation-delay: -38s; --sway: 10px; }
+  .f4 { bottom: -18%; animation-duration: 60s; animation-delay: -9s;  --sway: -15px; }
+  .f5 { bottom: -8%;  animation-duration: 50s; animation-delay: -29s; --sway: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-step { transition: none; }
+}
