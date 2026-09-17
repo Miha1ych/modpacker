@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Miha1ych Packer — сборка модов под тебя</title>
+<meta name="description" content="Собери подборку модов под свою версию Minecraft и загрузчик в пару кликов.">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg-scene" aria-hidden="true"></div>
+
+<div class="hearts" aria-hidden="true">
+  <span class="heart-wrap h1"><span class="heart"></span></span>
+  <span class="heart-wrap h2"><span class="heart"></span></span>
+  <span class="heart-wrap h3"><span class="heart"></span></span>
+  <span class="heart-wrap h4"><span class="heart"></span></span>
+  <span class="heart-wrap h5"><span class="heart"></span></span>
+  <span class="heart-wrap h6"><span class="heart"></span></span>
+  <span class="heart-wrap h7"><span class="heart"></span></span>
+</div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <img class="brand-mark" src="assets/logo.png" width="32" height="32" alt="Miha1ych Packer">
+      <span class="brand-text"><span class="brand-name">Miha1ych</span><span class="brand-suffix">Packer</span></span>
+    </div>
+    <a class="gh-link glass" href="#" target="_blank" rel="noopener" id="repoLink">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      <span>Код на GitHub</span>
+    </a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">Личный сборщик модов</span>
+    <h1>Собери свою сборку<br>за <span class="accent">пару кликов</span></h1>
+    <p class="hero-sub">Выбери направление, загрузчик, ядро рендера и версию игры — Miha1ych Packer сам найдёт совместимые моды на Modrinth и соберёт их в один ZIP.</p>
+  </section>
+
+  <section class="wizard-shell glass">
+
+    <div class="wizard-progress" id="wizardProgress"></div>
+
+    <div class="wizard-track" id="wizardTrack">
+
+      <!-- Шаг: категория -->
+      <div class="wizard-step" data-step="category">
+        <h2 class="step-title">Что качаем?</h2>
+        <div class="option-grid" id="categoryGrid"><!-- из mods-data.js --></div>
+        <div class="step-nav">
+          <span></span>
+          <button class="btn btn-primary" data-action="next" data-step-for="category" disabled>Далее</button>
+        </div>
+      </div>
+
+      <!-- Шаг: загрузчик -->
+      <div class="wizard-step" data-step="loader" hidden>
+        <h2 class="step-title">Загрузчик модов</h2>
+        <div class="option-grid cols-4" id="loaderGrid">
+          <button class="option-card" data-loader="fabric"><span class="option-icon">🧵</span><span class="option-title">Fabric</span></button>
+          <button class="option-card" data-loader="quilt"><span class="option-icon">🪡</span><span class="option-title">Quilt</span></button>
+          <button class="option-card" data-loader="neoforge"><span class="option-icon">🔥</span><span class="option-title">NeoForge</span></button>
+          <button class="option-card" data-loader="forge"><span class="option-icon">⚒️</span><span class="option-title">Forge</span></button>
+        </div>
+        <p class="hint">Не знаешь, что выбрать? <b>Fabric</b> — самый быстрый и лёгкий загрузчик, с ним работает большинство модов на оптимизацию.</p>
+        <div class="step-nav">
+          <button class="btn btn-ghost" data-action="back">Назад</button>
+          <button class="btn btn-primary" data-action="next" data-step-for="loader" disabled>Далее</button>
+        </div>
+      </div>
+
+      <!-- Шаг: версия -->
+      <div class="wizard-step" data-step="version" hidden>
+        <h2 class="step-title">Версия Minecraft</h2>
+        <select id="versionSelect" class="glass-input" disabled>
+          <option value="">Сначала выбери загрузчик…</option>
+        </select>
+        <div class="step-nav">
+          <button class="btn btn-ghost" data-action="back">Назад</button>
+          <button class="btn btn-primary" id="versionNextBtn" disabled>Далее</button>
+        </div>
+      </div>
+
+      <!-- Шаг: ядро рендера -->
+      <div class="wizard-step" data-step="engine" hidden>
+        <h2 class="step-title">Ядро рендера</h2>
+        <p class="step-sub">Это фундамент сборки — ставится только одно ядро, остальные моды подбираются уже под него.</p>
+        <div class="option-grid cols-2" id="engineGrid"><!-- из mods-data.js --></div>
+        <p class="status-text" id="engineStatus"></p>
+        <div class="step-nav">
+          <button class="btn btn-ghost" data-action="back">Назад</button>
+          <button class="btn btn-primary" id="resolveBtn" disabled>Подобрать моды</button>
+        </div>
+        <p class="status-text" id="resolveStatus"></p>
+      </div>
+
+      <!-- Шаг: результат -->
+      <div class="wizard-step" data-step="results" hidden>
+        <div class="results-head">
+          <h2 class="step-title"><span id="resultsCategoryTitle"></span> — доступные моды</h2>
+          <p class="hint">Отмечены галочкой — рекомендуемые. Можно снять или добавить лишние.</p>
+        </div>
+
+        <div class="mods-group" id="engineResultGroup" hidden>
+          <h3 class="mods-group-title">Ядро рендера</h3>
+          <div class="mods-grid" id="engineModGrid"></div>
+        </div>
+
+        <div class="mods-group">
+          <h3 class="mods-group-title">Рекомендуемые</h3>
+          <div class="mods-grid" id="coreModsGrid"></div>
+        </div>
+
+        <div class="mods-group">
+          <h3 class="mods-group-title">Дополнительно</h3>
+          <div class="mods-grid" id="optionalModsGrid"></div>
+        </div>
+
+        <div class="mods-group" id="unavailableGroup" hidden>
+          <h3 class="mods-group-title muted">Недоступно для этой версии/загрузчика</h3>
+          <div class="mods-grid muted" id="unavailableModsGrid"></div>
+        </div>
+
+        <div class="download-bar">
+          <button id="downloadBtn" class="btn btn-accent" disabled>
+            Скачать ZIP (<span id="selectedCount">0</span>)
+          </button>
+          <div class="progress-wrap" id="progressWrap" hidden>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <span class="status-text" id="downloadStatus"></span>
+          </div>
+        </div>
+
+        <details class="howto glass">
+          <summary>Что делать с ZIP-архивом дальше?</summary>
+          <ol>
+            <li>Распакуй архив.</li>
+            <li>Установи загрузчик модов для выбранной версии — через <a href="https://prismlauncher.org/" target="_blank" rel="noopener">Prism Launcher</a> или официальный установщик загрузчика.</li>
+            <li>Скопируй все <code>.jar</code>-файлы из архива в папку <code>mods</code> твоего профиля.</li>
+            <li>Запускай игру!</li>
+          </ol>
+        </details>
+
+        <div class="step-nav">
+          <button class="btn btn-ghost" data-action="back">Назад</button>
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Моды скачиваются напрямую из браузера с <a href="https://modrinth.com" target="_blank" rel="noopener">Modrinth</a> — этот сайт ничего не хранит и не хостит сам. Соблюдай лицензии авторов модов.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="js/mods-data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
