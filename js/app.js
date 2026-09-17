@@ -12,31 +12,17 @@
  * -----------------------------------------------------------------------
  */
 
-const API = 'https://api.modrinth.com/v2';
+// API, api(), formatSize() и другие общие мелочи теперь живут в js/common.js
+// (он подключается в index.html раньше этого файла).
 
-/** Небольшая обёртка над fetch с человеческими ошибками */
-async function api(path) {
-  const res = await fetch(API + path);
-  if (res.status === 429) {
-    throw new Error('Modrinth временно ограничил запросы (слишком часто). Подожди минуту и попробуй снова.');
-  }
-  if (!res.ok) {
-    throw new Error(`Modrinth API вернул ошибку ${res.status} на ${path}`);
-  }
-  return res.json();
-}
+// Список версий рисуем кастомным выпадающим списком (всегда открывается
+// вниз, в едином стиле) — см. enhanceSelectAsDropdown() в js/common.js.
+enhanceSelectAsDropdown(document.getElementById('versionSelect'));
 
 function loadersForQuery(loader) {
   // Quilt умеет запускать моды под Fabric, поэтому ищем совместимость по обоим.
   if (loader === 'quilt') return ['quilt', 'fabric'];
   return [loader];
-}
-
-function formatSize(bytes) {
-  if (!bytes) return '';
-  const mb = bytes / 1024 / 1024;
-  if (mb < 1) return `${Math.round(bytes / 1024)} КБ`;
-  return `${mb.toFixed(1)} МБ`;
 }
 
 // -------------------------------------------------------------------------
@@ -209,7 +195,7 @@ async function loadGameVersions() {
 
 function renderVersionOptions() {
   const versionSelect = document.getElementById('versionSelect');
-  const list = allGameVersions.filter((v) => v.version_type === 'release');
+  const list = filterModernVersions(allGameVersions.filter((v) => v.version_type === 'release'));
 
   versionSelect.innerHTML = '<option value="">Выбери версию…</option>' +
     list.map((v) => `<option value="${v.version}">${v.version}</option>`).join('');
@@ -458,26 +444,13 @@ function renderResults() {
 
   const coreGrid = document.getElementById('coreModsGrid');
   const optGrid = document.getElementById('optionalModsGrid');
-  const unavailGroup = document.getElementById('unavailableGroup');
-  const unavailGrid = document.getElementById('unavailableModsGrid');
 
   coreGrid.innerHTML = state.resolved.core.map((m, i) => modCardHTML(m, true, i)).join('') || '<p class="hint">Ничего не найдено.</p>';
   optGrid.innerHTML = state.resolved.optional.map((m, i) => modCardHTML(m, false, i)).join('') || '<p class="hint">Нет дополнительных модов.</p>';
 
-  if (state.resolved.unavailable.length) {
-    unavailGroup.hidden = false;
-    unavailGrid.innerHTML = state.resolved.unavailable.map((m, i) => `
-      <div class="mod-card unavailable stagger-in" style="animation-delay:${Math.min(i * 35, 350)}ms">
-        <div class="mod-icon placeholder">🚫</div>
-        <div class="mod-info">
-          <div class="mod-title">${m.meta.title || m.slug}</div>
-          <div class="mod-note">Нет сборки под ${state.loader} ${state.gameVersion}</div>
-        </div>
-      </div>
-    `).join('');
-  } else {
-    unavailGroup.hidden = true;
-  }
+  // Блок "недоступно для этой версии/загрузчика" убран из интерфейса —
+  // state.resolved.unavailable всё ещё считается в resolveMods() (вдруг
+  // понадобится для статистики), просто больше нигде не рендерится.
 
   document.querySelectorAll('.mod-card:not(.unavailable)').forEach((card) => {
     // Карточка — это <label>, клик по ней нативно переключает вложенный

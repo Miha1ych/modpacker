@@ -18,14 +18,12 @@
 
 <div class="bg-scene" aria-hidden="true"></div>
 
-<div class="hearts" aria-hidden="true">
-  <span class="heart-wrap h1"><span class="heart"></span></span>
-  <span class="heart-wrap h2"><span class="heart"></span></span>
-  <span class="heart-wrap h3"><span class="heart"></span></span>
-  <span class="heart-wrap h4"><span class="heart"></span></span>
-  <span class="heart-wrap h5"><span class="heart"></span></span>
-  <span class="heart-wrap h6"><span class="heart"></span></span>
-  <span class="heart-wrap h7"><span class="heart"></span></span>
+<div class="fireflies" aria-hidden="true">
+  <span class="firefly-wrap f1"><span class="firefly"></span></span>
+  <span class="firefly-wrap f2"><span class="firefly"></span></span>
+  <span class="firefly-wrap f3"><span class="firefly"></span></span>
+  <span class="firefly-wrap f4"><span class="firefly"></span></span>
+  <span class="firefly-wrap f5"><span class="firefly"></span></span>
 </div>
 
 <header class="site-header">
@@ -34,10 +32,11 @@
       <img class="brand-mark" src="assets/logo.png" width="32" height="32" alt="Miha1ych Packer">
       <span class="brand-text"><span class="brand-name">Miha1ych</span><span class="brand-suffix">Packer</span></span>
     </div>
-    <a class="gh-link glass" href="#" target="_blank" rel="noopener" id="repoLink">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-      <span>Код на GitHub</span>
-    </a>
+    <nav class="top-nav" aria-label="Разделы сайта">
+      <a class="top-nav-link is-active" href="index.html">Пакер</a>
+      <a class="top-nav-link" href="virus-check.html">Проверка на вирусы</a>
+      <a class="top-nav-link" href="repack.html">Текстурпаки</a>
+    </nav>
   </div>
 </header>
 
@@ -68,13 +67,36 @@
       <!-- Шаг: загрузчик -->
       <div class="wizard-step" data-step="loader" hidden>
         <h2 class="step-title">Загрузчик модов</h2>
-        <div class="option-grid cols-4" id="loaderGrid">
-          <button class="option-card" data-loader="fabric"><span class="option-icon">🧵</span><span class="option-title">Fabric</span></button>
-          <button class="option-card" data-loader="quilt"><span class="option-icon">🪡</span><span class="option-title">Quilt</span></button>
-          <button class="option-card" data-loader="neoforge"><span class="option-icon">🔥</span><span class="option-title">NeoForge</span></button>
-          <button class="option-card" data-loader="forge"><span class="option-icon">⚒️</span><span class="option-title">Forge</span></button>
+        <div class="option-grid cols-2" id="loaderGrid">
+          <button class="option-card" data-loader="fabric">
+            <span class="option-head">
+              <img class="option-icon pixel-icon" src="assets/loader-fabric.png" alt="" loading="lazy">
+              <span class="option-title">Fabric</span>
+            </span>
+            <span class="option-tagline">Самый быстрый и лёгкий загрузчик. Под него выходит больше всего модов на оптимизацию и новинок вообще — если не уверен, что выбрать, бери его.</span>
+          </button>
+          <button class="option-card" data-loader="quilt">
+            <span class="option-head">
+              <img class="option-icon" src="assets/loader-quilt.png" alt="" loading="lazy">
+              <span class="option-title">Quilt</span>
+            </span>
+            <span class="option-tagline">Форк Fabric с расширенным API. Полностью совместим с фабриковскими модами, но своих отдельных модов под него делают заметно меньше.</span>
+          </button>
+          <button class="option-card" data-loader="neoforge">
+            <span class="option-head">
+              <img class="option-icon pixel-icon" src="assets/loader-neoforge.png" alt="" loading="lazy">
+              <span class="option-title">NeoForge</span>
+            </span>
+            <span class="option-tagline">Активно развивающийся форк Forge. Большинство крупных модов уже переехали на него, с оптимизацией дружит заметно лучше классического Forge.</span>
+          </button>
+          <button class="option-card" data-loader="forge">
+            <span class="option-head">
+              <img class="option-icon" src="assets/loader-forge.jpg" alt="" loading="lazy">
+              <span class="option-title">Forge</span>
+            </span>
+            <span class="option-tagline">Старейший загрузчик с самой большой базой модов. Но инструментов на оптимизацию под него заметно меньше, чем под Fabric/NeoForge — если главная цель FPS, лучше выбрать другой загрузчик.</span>
+          </button>
         </div>
-        <p class="hint">Не знаешь, что выбрать? <b>Fabric</b> — самый быстрый и лёгкий загрузчик, с ним работает большинство модов на оптимизацию.</p>
         <div class="step-nav">
           <button class="btn btn-ghost" data-action="back">Назад</button>
           <button class="btn btn-primary" data-action="next" data-step-for="loader" disabled>Далее</button>
@@ -128,11 +150,6 @@
           <div class="mods-grid" id="optionalModsGrid"></div>
         </div>
 
-        <div class="mods-group" id="unavailableGroup" hidden>
-          <h3 class="mods-group-title muted">Недоступно для этой версии/загрузчика</h3>
-          <div class="mods-grid muted" id="unavailableModsGrid"></div>
-        </div>
-
         <div class="download-bar">
           <button id="downloadBtn" class="btn btn-accent" disabled>
             Скачать ZIP (<span id="selectedCount">0</span>)
@@ -147,7 +164,6 @@
           <summary>Что делать с ZIP-архивом дальше?</summary>
           <ol>
             <li>Распакуй архив.</li>
-            <li>Установи загрузчик модов для выбранной версии — через <a href="https://prismlauncher.org/" target="_blank" rel="noopener">Prism Launcher</a> или официальный установщик загрузчика.</li>
             <li>Скопируй все <code>.jar</code>-файлы из архива в папку <code>mods</code> твоего профиля.</li>
             <li>Запускай игру!</li>
           </ol>
@@ -171,6 +187,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="js/common.js"></script>
 <script src="js/mods-data.js"></script>
 <script src="js/app.js"></script>
 </body>
